@@ -26,10 +26,12 @@ X<-scale(X)
 
 plot(X)
 #Dissimilarity Matrix
+
 d<-dist(X,method="manhattan") #Distancias disponibles euclidean, maximum, manhattan, canberra, binary, minkowski
 #Ejecucion de Algoritmo Jerarquico
 hc1<-hclust(d,method = "complete")
 #Graficacion de Dendegrama
 plot(hc1, cex=0.6,hang=-1,main = "Dendograma OldFaithFull",labels = FALSE)
+
 
 
