@@ -32,6 +32,8 @@ d1<-dist(iris[,c(2:5)],method="euclidean")
 
 #Ejecucion de Algoritmo Jerarquico
 hc1<-hclust(d1,method = "complete")
+d<-dist(X,method="manhattan") #Distancias disponibles euclidean, maximum, manhattan, canberra, binary, minkowski
+hc1<-hclust(d,method = "complete")
 hc2<-hclust(d,method = "single")
 hc3<-hclust(d,method = "median")
 hc4<-hclust(d,method = "centroid")
