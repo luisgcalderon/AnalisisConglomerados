@@ -6,16 +6,20 @@
 rm(list=ls())
 
 
-##DataSet
-x<-faithful$waiting
+##DataSet----
+x<-faithful
+View(x)
 x<-c(3,7)
-
-##Packages
+plot(x$waiting,seq(1,length(x$waiting)))
+plot(x$waiting,rep(0,length(x$waiting)))
+curve(dnorm(x1))
+##Packages----
 install.packages("mixtools") #Mixtools package for drawing the elipse
 library(mixtools)
 install.packages("MASS") #MASS pachake for calculating bivariate normal probability
 library(MASS)
 
+##EM Algorithm 1-Dimmension----
 ## Initial Paramaters
 # Target parameters for univariate normal distributions
 p<-0.5 #Parametro de Proporcionalidad de Pimera Normal
@@ -29,11 +33,12 @@ p<- c(0.10,0.9)
 # Parameters for bivariate normal distribution
 mu <- c(mu1,mu2) # Vector Mean
 sigma <- matrix(c(s1^2, s1*s2*rho, s1*s2*rho, s2^2),2) # Covariance matrix
-
+psi<-list(p,mu,sigma)
+ncomp<-2
 
 # Function to draw ellipse for bivariate normal data
 ellipse_bvn <- function(bvn, alpha){
-  Xbar <- apply(x,2,mean)
+    Xbar <- apply(x,2,FUN = mean)
   S <- cov(x)
   ellipse(Xbar, S, alpha = 0.05, col="red")
 }
