@@ -47,6 +47,22 @@ sigma <- matrix(c(s1^2, s1*s2*rho, s1*s2*rho, s2^2),2) # Covariance matrix
 #Parametros para el modelo
 psi<-list(p,mu,sigma)
 
+EMFaithfull1d<-function(datos, nm.cp, l.psi,mtd.e){
+  ep<-numeric(length(x))
+  p.m<-unlist(parn[1])
+  p<-numeric(length(p.s))
+  
+  ep<-((dnorm(x,mean = theta1[1],sd = sqrt(theta1[2]))*p.m[1])/((dnorm(x,mean = theta1[1],sd = sqrt(theta1[2]))*p.m[1])+(dnorm(x,mean = theta2[1],sd = sqrt(theta2[2]))*p.s[2])))
+  p[1]<-mean(ep) #Aproximacion del Ponderador
+  p[2]<-(1-p[1]) #Complemento a la otra distribución
+  theta1[1]<- sum(ep*x)/p[1]
+  theta1[2]<- sum(ep*(x-theta1[1])^2)/p[1]
+  theta2[1]<- sum((1-ep)*x)/p[2]
+  theta2[2]<- sum((1-ep)*(x-theta2[1])^2)/p[2]
+  
+  parn1<-list(p,theta1,theta2)
+  return(parn1)
+}
 # Function to draw ellipse for bivariate normal data----
 bvn1 <- mvrnorm(N, mu = mu, Sigma = sigma ) # from MASS package
 colnames(bvn1) <- c("bvn1_X1","bvn1_X2")
@@ -89,22 +105,6 @@ sumpar<-function(parn,sc){
   
 }
 
-EMFaithfull1d<-function(x, parn){
-  ep<-numeric(length(x))
-  p.m<-unlist(parn[1])
-  p<-numeric(length(p.s))
-  
-  ep<-((dnorm(x,mean = theta1[1],sd = sqrt(theta1[2]))*p.m[1])/((dnorm(x,mean = theta1[1],sd = sqrt(theta1[2]))*p.m[1])+(dnorm(x,mean = theta2[1],sd = sqrt(theta2[2]))*p.s[2])))
-  p[1]<-mean(ep) #Aproximacion del Ponderador
-  p[2]<-(1-p[1]) #Complemento a la otra distribución
-  theta1[1]<- sum(ep*x)/p[1]
-  theta1[2]<- sum(ep*(x-theta1[1])^2)/p[1]
-  theta2[1]<- sum((1-ep)*x)/p[2]
-  theta2[2]<- sum((1-ep)*(x-theta2[1])^2)/p[2]
-  
-  parn1<-list(p,theta1,theta2)
-  return(parn1)
-}
 
 
 class(unlist(parn[1]))
