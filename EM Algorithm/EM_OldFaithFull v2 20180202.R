@@ -2,47 +2,52 @@
 ## EM Algorithm for Old Faithful Data Set
 # Luis Gerardo Calderon Contreras
 
-## Clear Environment
+## Clear Environment ----
 rm(list=ls())
 
+## Installation of Packages----
+install.packages("mixtools") #Mixtools package for drawing the elipse
+install.packages("MASS") #MASS pachake for calculating bivariate normal probability
+install.packages("ggplot2")
+
+##Packages
+library(mixtools)
+library(MASS)
+library(ggplot2)
 
 ##DataSet----
+data(faithful)
+str(faithful)
 x<-faithful
-View(x)
-x<-c(3,7)
-plot(x$waiting,seq(1,length(x$waiting)))
-plot(x$waiting,rep(0,length(x$waiting)))
-curve(dnorm(x1))
-##Packages----
-install.packages("mixtools") #Mixtools package for drawing the elipse
-library(mixtools)
-install.packages("MASS") #MASS pachake for calculating bivariate normal probability
-library(MASS)
+ggplot(faithful,aes(waiting,eruptions))+
+  geom_point()
+View(faithful)
+
+ggplot(faithful,aes(waiting,1))+
+  geom_point()+
+  stat_function(fun = dnorm,n = 101, args = list(mean=mean(x$eruptions),sd=sd(x$eruptions)))
+
+
 
 ##EM Algorithm 1-Dimmension----
 ## Initial Paramaters
 # Target parameters for univariate normal distributions
-p<-0.5 #Parametro de Proporcionalidad de Pimera Normal
+p<- c(0.10,0.9) #Parametro de Proporcionalidad de Pimera Normal
+mod.comp<-length(p)
 rho <- -0.6  #Correlation Coefficient
 mu1 <- 1; s1 <- 2 #First Parameters
 mu2 <- 1; s2 <- 8 #Second Parameters
 
 #Parametros de la Mixtura
-p<- c(0.10,0.9)
 
 # Parameters for bivariate normal distribution
 mu <- c(mu1,mu2) # Vector Mean
 sigma <- matrix(c(s1^2, s1*s2*rho, s1*s2*rho, s2^2),2) # Covariance matrix
+
+#Parametros para el modelo
 psi<-list(p,mu,sigma)
-ncomp<-2
 
-# Function to draw ellipse for bivariate normal data
-ellipse_bvn <- function(bvn, alpha){
-    Xbar <- apply(x,2,FUN = mean)
-  S <- cov(x)
-  ellipse(Xbar, S, alpha = 0.05, col="red")
-}
-
+# Function to draw ellipse for bivariate normal data----
 bvn1 <- mvrnorm(N, mu = mu, Sigma = sigma ) # from MASS package
 colnames(bvn1) <- c("bvn1_X1","bvn1_X2")
 
