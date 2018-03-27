@@ -35,33 +35,37 @@ mod.comp<-length(p)
 mu <- c(1,1); sig<- c(2,4) #First Parameters
 x<-faithful$waiting
 psi<-data.frame(p,mu,sig)
-EMSteps<-function(x, g, psi,mtd.e){
+EMSteps<-function(x, g, psi){
   psi.t<-psi
   
-  # M Step
+  # M Step Estimate PI
   for (i in 1:(g-1)) {
     t<-numeric(length(x))
+    #Compute Bayes Probability Formula
     for (j in 1:length(x)) {
       t[j]<-(psi.t[i,"p"]*dnorm(x[j],mean = psi.t[i,"mu"],
                              sd = psi.t[i,"sig"]))
-      a<-numeric(1)
-      for (w in 1:(g)) {
+      a<-t[j]
+      for (w in ((1:g)[-i])) {
         a<-a+(psi.t[w,"p"]*dnorm(x[j],mean = psi.t[w,"mu"],
                                  sd = psi.t[w,"sig"]))
       }
       t[j]<-t[j]/a
     }
+    #Estimate pi
     psi.t[i,"p"]=sum(t)/length(x)
   }
   psi.t[g,"p"]=1-sum(psi.t[-g,"p"])
-  # E Step Estimate mu&sigma
-  # estimate mu
+  # E Step Estimate mu & sigma
   for (i in 1:g) {
     t<-numeric(length(x))
     t<-(psi.t[i,"p"]*dnorm(x,mean = psi.t[i,"mu"],
                            sd = psi.t[i,"sig"]))
+    # estimate mu
     psi.t[i,"mu"]<-(t%*%x)/(sum(t))
+    # estimate sigma
     psi.t[i,"sig"]<-(t%*%((x-psi.t[i,"mu"])^2))/(sum(t))
   }
+  return(psi.t)
 }
 

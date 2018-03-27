@@ -27,18 +27,57 @@ ggplot(faithful,aes(waiting,1))+
   geom_point()+
   stat_function(fun = dnorm,n = 101, args = list(mean=mean(x$eruptions),sd=sd(x$eruptions)))
 
+# EM 1-D Algorithm ----
+
+#Funcion Pasos EM
+EMSteps<-function(x, g, psi){
+  psi.t<-psi
+  
+  # M Step Estimate PI
+  for (i in 1:(g-1)) {
+    t<-numeric(length(x))
+    #Compute Bayes Probability Formula
+    for (j in 1:length(x)) {
+      t[j]<-(psi.t[i,"p"]*dnorm(x[j],mean = psi.t[i,"mu"],
+                                sd = psi.t[i,"sig"]))
+      a<-t[j]
+      for (w in ((1:g)[-i])) {
+        a<-a+(psi.t[w,"p"]*dnorm(x[j],mean = psi.t[w,"mu"],
+                                 sd = psi.t[w,"sig"]))
+      }
+      t[j]<-t[j]/a
+    }
+    #Estimate pi
+    psi.t[i,"p"]=sum(t)/length(x)
+  }
+  psi.t[g,"p"]=1-sum(psi.t[-g,"p"])
+  # E Step Estimate mu & sigma
+  for (i in 1:g) {
+    t<-numeric(length(x))
+    t<-(psi.t[i,"p"]*dnorm(x,mean = psi.t[i,"mu"],
+                           sd = psi.t[i,"sig"]))
+    # estimate mu
+    psi.t[i,"mu"]<-(t%*%x)/(sum(t))
+    # estimate sigma
+    psi.t[i,"sig"]<-(t%*%((x-psi.t[i,"mu"])^2))/(sum(t))
+  }
+  return(psi.t)
+}
+# Funcion Convergencia-Iteracion
 
 
-##EM Algorithm 1-Dimmension----
-## Initial Paramaters
-# Target parameters for univariate normal distributions
-p<- c(0.10,0.9) #Parametro de Proporcionalidad de Pimera Normal
-mod.comp<-length(p)
-rho <- -0.6  #Correlation Coefficient
-mu1 <- 1; s1 <- 2 #First Parameters
-mu2 <- 1; s2 <- 8 #Second Parameters
+# Data to Model 
+x<-faithful$waiting
+# Parameters of the Mixture Model
+p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
+g<-(length(p)) #Componentes del Modelo 
+# Initial Parameters of the Normal Distribution
+mu <- c(52,82); sig<- c(16,16) # Parametros Mu y Sigma respectivamente
+psi<-data.frame(p,mu,sig)
 
-#Parametros de la Mixtura
+
+
+#Parametros de la Mixtura----
 
 # Parameters for bivariate normal distribution
 mu <- c(mu1,mu2) # Vector Mean
@@ -47,22 +86,7 @@ sigma <- matrix(c(s1^2, s1*s2*rho, s1*s2*rho, s2^2),2) # Covariance matrix
 #Parametros para el modelo
 psi<-list(p,mu,sigma)
 
-EMFaithfull1d<-function(datos, nm.cp, l.psi,mtd.e){
-  ep<-numeric(length(x))
-  p.m<-unlist(parn[1])
-  p<-numeric(length(p.s))
-  
-  ep<-((dnorm(x,mean = theta1[1],sd = sqrt(theta1[2]))*p.m[1])/((dnorm(x,mean = theta1[1],sd = sqrt(theta1[2]))*p.m[1])+(dnorm(x,mean = theta2[1],sd = sqrt(theta2[2]))*p.s[2])))
-  p[1]<-mean(ep) #Aproximacion del Ponderador
-  p[2]<-(1-p[1]) #Complemento a la otra distribución
-  theta1[1]<- sum(ep*x)/p[1]
-  theta1[2]<- sum(ep*(x-theta1[1])^2)/p[1]
-  theta2[1]<- sum((1-ep)*x)/p[2]
-  theta2[2]<- sum((1-ep)*(x-theta2[1])^2)/p[2]
-  
-  parn1<-list(p,theta1,theta2)
-  return(parn1)
-}
+
 # Function to draw ellipse for bivariate normal data----
 bvn1 <- mvrnorm(N, mu = mu, Sigma = sigma ) # from MASS package
 colnames(bvn1) <- c("bvn1_X1","bvn1_X2")
