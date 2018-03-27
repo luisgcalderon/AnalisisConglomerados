@@ -34,34 +34,34 @@ mod.comp<-length(p)
 
 mu <- c(1,1); sig<- c(2,4) #First Parameters
 x<-faithful$waiting
-l.psi<-data.frame(p,mu,sig)
-EMFaithfull1d<-function(x, g, l.psi,mtd.e){
-  l.psi.t<-l.psi
+psi<-data.frame(p,mu,sig)
+EMSteps<-function(x, g, psi,mtd.e){
+  psi.t<-psi
   
   # M Step
   for (i in 1:(g-1)) {
     t<-numeric(length(x))
     for (j in 1:length(x)) {
-      t[j]<-(l.psi[i,"p"]*dnorm(x[j],mean = l.psi[i,"mu"],
-                             sd = l.psi[i,"sig"]))
+      t[j]<-(psi.t[i,"p"]*dnorm(x[j],mean = psi.t[i,"mu"],
+                             sd = psi.t[i,"sig"]))
       a<-numeric(1)
       for (w in 1:(g)) {
-        a<-a+(l.psi[w,"p"]*dnorm(x[j],mean = l.psi[w,"mu"],
-                                 sd = l.psi[w,"sig"]))
+        a<-a+(psi.t[w,"p"]*dnorm(x[j],mean = psi.t[w,"mu"],
+                                 sd = psi.t[w,"sig"]))
       }
       t[j]<-t[j]/a
     }
-    l.psi[i,"p"]=sum(t)/length(x)
+    psi.t[i,"p"]=sum(t)/length(x)
   }
-  l.psi[g,"p"]=1-sum(l.psi[-g,"p"])
+  psi.t[g,"p"]=1-sum(psi.t[-g,"p"])
   # E Step Estimate mu&sigma
   # estimate mu
   for (i in 1:g) {
     t<-numeric(length(x))
-    t<-(l.psi[i,"p"]*dnorm(x,mean = l.psi[i,"mu"],
-                           sd = l.psi[i,"sig"]))
-    l.psi[i,"mu"]<-(t%*%x)/(sum(t))
-    l.psi[i,"sig"]<-(t%*%((x-l.psi[i,"mu"])^2))/(sum(t))
+    t<-(psi.t[i,"p"]*dnorm(x,mean = psi.t[i,"mu"],
+                           sd = psi.t[i,"sig"]))
+    psi.t[i,"mu"]<-(t%*%x)/(sum(t))
+    psi.t[i,"sig"]<-(t%*%((x-psi.t[i,"mu"])^2))/(sum(t))
   }
 }
 
