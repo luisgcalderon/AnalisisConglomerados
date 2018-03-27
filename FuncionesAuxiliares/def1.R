@@ -23,6 +23,16 @@ q<-function(c,me,des,colr){stat_function(fun = dnorm,n = 101,
 rainbowcols <- rainbow(6)
 
 # Funcion Convergencia-Iteracion ----
+# Pedimos datos, numero de componentes,
+#   y metodo de convergencia (relativo,angulo,maxvers),
+#   diferencia minima de paro
 
+EMAlgorithm1d<-function(dato,g,metodo,difmin){
+  if (metodo="relativo") {
+    
+  } ifelse (metodo="angulo"){
+    
+  } else 
+}
 
         
