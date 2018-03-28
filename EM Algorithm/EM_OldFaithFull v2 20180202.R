@@ -32,18 +32,17 @@ ggplot(faithful,aes(waiting,1))+
 #Funcion Pasos EM
 EMSteps<-function(x, g, psi){
   psi.t<-psi
-  
   # M Step Estimate PI
   for (i in 1:(g-1)) {
     t<-numeric(length(x))
     #Compute Bayes Probability Formula
+    t<-(psi[i,"p"]*dnorm(x,mean = psi[i,"mu"],
+                            sd = sqrt(psi[i,"sig"])))
     for (j in 1:length(x)) {
-      t[j]<-(psi.t[i,"p"]*dnorm(x[j],mean = psi.t[i,"mu"],
-                                sd = psi.t[i,"sig"]))
-      a<-t[j]
-      for (w in ((1:g)[-i])) {
-        a<-a+(psi.t[w,"p"]*dnorm(x[j],mean = psi.t[w,"mu"],
-                                 sd = psi.t[w,"sig"]))
+      a<-numeric(1)
+      for (w in ((1:g))) {
+        a<-a+(psi[w,"p"]*dnorm(x[j],mean = psi[w,"mu"],
+                                 sd = sqrt(psi[w,"sig"])))
       }
       t[j]<-t[j]/a
     }
@@ -54,8 +53,16 @@ EMSteps<-function(x, g, psi){
   # E Step Estimate mu & sigma
   for (i in 1:g) {
     t<-numeric(length(x))
-    t<-(psi.t[i,"p"]*dnorm(x,mean = psi.t[i,"mu"],
-                           sd = psi.t[i,"sig"]))
+    t<-(psi[i,"p"]*dnorm(x,mean = psi[i,"mu"],
+                           sd = sqrt(psi[i,"sig"])))
+    for (j in 1:length(x)) {
+      a<-numeric(1)
+      for (w in ((1:g))) {
+        a<-a+(psi[w,"p"]*dnorm(x[j],mean = psi[w,"mu"],
+                               sd = sqrt(psi[w,"sig"])))
+      }
+      t[j]<-t[j]/a
+    }
     # estimate mu
     psi.t[i,"mu"]<-(t%*%x)/(sum(t))
     # estimate sigma
@@ -63,10 +70,31 @@ EMSteps<-function(x, g, psi){
   }
   return(psi.t)
 }
-# Funcion Convergencia-Iteracion
 
 
-# Data to Model 
+# Funcion Convergencia-Iteracion 
+# Pedimos datos, numero de componentes, parametros iniciales
+#   y metodo de convergencia (relativo,angulo,maxvers),
+#   diferencia minima de paro
+
+EMAlgorithm1d<-function(dato,g,psi,metodo,difmin) {
+  psi.t<-EMSteps(x = dato,g = g,psi = psi)
+  if (metodo=="relativo") {
+    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*3))>0) {
+      psi<-psi.t
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin)
+    }
+  } else if (metodo=="angulo"){
+    print(2)
+  } else if (metodo=="difmin") {
+    print(3)
+  } else {print("No se definio correctamente el metodo")}
+  return(psi.t)
+}
+
+
+
+# Data to Model ----
 x<-faithful$waiting
 # Parameters of the Mixture Model
 p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
@@ -75,6 +103,8 @@ g<-(length(p)) #Componentes del Modelo
 mu <- c(52,82); sig<- c(16,16) # Parametros Mu y Sigma respectivamente
 psi<-data.frame(p,mu,sig)
 
+res<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001)
+res
 
 
 #Parametros de la Mixtura----
