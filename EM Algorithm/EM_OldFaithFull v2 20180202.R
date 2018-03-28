@@ -89,10 +89,10 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin) {
   } else if (metodo=="angulo"){
     print(2)
   } else if (metodo=="difmin") {
+    print(3)
   } else {print("No se definio correctamente el metodo")}
   return(psi.t)
 }
-
 
 
 # Data to Model ----
