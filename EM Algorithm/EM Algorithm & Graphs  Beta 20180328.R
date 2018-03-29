@@ -6,13 +6,9 @@
 rm(list=ls())
 
 ## Installation of Packages----
-install.packages("mixtools") #Mixtools package for drawing the elipse
-install.packages("MASS") #MASS pachake for calculating bivariate normal probability
 install.packages("ggplot2")
 
 ##Packages ----
-library(mixtools)
-library(MASS)
 library(ggplot2)
 
 
