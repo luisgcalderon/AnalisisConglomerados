@@ -20,5 +20,3 @@ q<-function(c,me,des,colr){stat_function(fun = dnorm,n = 101,
                                                args = list(mean=des,
                                                            sd=des,col=colr))
                                                }
-rainbowcols <- rainbow(6)
-
