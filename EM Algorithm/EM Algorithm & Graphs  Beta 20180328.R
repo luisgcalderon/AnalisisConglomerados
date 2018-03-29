@@ -114,28 +114,37 @@ angle <- function(x,y){
 #   y metodo de convergencia (relativo,angulo,maxvers),
 #   diferencia minima de paro
 
-EMAlgorithm1d<-function(dato,g,psi,metodo,difmin) {
+EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t) {
   psi.t<-EMSteps(x = dato,g = g,psi = psi)
+  a<-t+1
   if (metodo=="relativo") {
     if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*3))>0) {
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin)
-    }
-  } else if (metodo=="angulo"){
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)} else{
+        print(a)
+        return(psi.t)
+      }
+    } else if (metodo=="angulo"){
     w<-unlist(psi.t[-1])
     z<-unlist(psi[-1])
     if (abs(angle(w,z))>difmin){
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin)
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+    }else{
+      print(a)
+      return(psi.t)
     }
   } else if (metodo=="verosi") {
     if (maxver(x = dato,g = g,psi = psi.t)-maxver(x = dato,g = g,psi = psi)>difmin){
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin)
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+    }else{
+      print(a)
+      return(psi.t)
     }
   } else {print("No se definio correctamente el metodo")}
-  return(psi.t)
 }
+
 
 
 
