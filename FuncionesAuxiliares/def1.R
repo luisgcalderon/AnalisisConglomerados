@@ -22,15 +22,3 @@ q<-function(c,me,des,colr){stat_function(fun = dnorm,n = 101,
                                                }
 rainbowcols <- rainbow(6)
 
-<<<<<<< HEAD
-
-
-#Calcular Verosimilitud
-#Pedir datos, componentes, parametros
-
-maxver<-function(x,g,psi){
-  
-}
-  
-=======
->>>>>>> 0c4cbf8aa9d975826fa0925ef62e694806db5136

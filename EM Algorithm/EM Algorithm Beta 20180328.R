@@ -85,6 +85,7 @@ maxver<-function(x,g,psi){
   return(s)
 }
 
+
 #Calcular angulo entre vectores
 angle <- function(x,y){
   dot.prod <- x%*%y 
@@ -93,6 +94,7 @@ angle <- function(x,y){
   theta <- acos(dot.prod / (norm.x * norm.y))
   as.numeric(theta)
 }
+
 # Funcion Convergencia-Iteracion 
 # Pedimos datos, numero de componentes, parametros iniciales
 #   y metodo de convergencia (relativo,angulo,maxvers),
@@ -122,16 +124,6 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin) {
 }
 
 
-# Data to Model ----
-x<-faithful$waiting
-# Parameters of the Mixture Model
-p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
-g<-(length(p)) #Componentes del Modelo 
-# Initial Parameters of the Normal Distribution
-mu <- c(52,82); sig<- c(16,16) # Parametros Mu y Sigma respectivamente
-psi<-data.frame(p,mu,sig)
 
-res<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001)
-res
 
 
