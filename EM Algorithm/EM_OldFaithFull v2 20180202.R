@@ -50,12 +50,15 @@ plot1<-ggplot(data.frame(i<-c(1:length(x)),x),aes(x,-0.005))+
     panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1) + ylab("")
 plot(plot1)
 
-
+psi.t<-EMSteps(x,g,psi)
+psi.t1<-EMSteps(x,g,psi.t)
+psi.t2<-EMSteps(x,g,psi.t1)
+psi.t3<-EMSteps(x,g,psi.t2)
+psi.t4<-EMSteps(x,g,psi.t3)
 #relativo, angulo, verosi
-psi.rel<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001)
-psi.ang<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "angulo",difmin = 0.0001)
-psi.ver<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "verosi",difmin = 0.0001)
-
+psi.rel<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001,t = 0)
+psi.ang<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "angulo",difmin = 0.0001,t=0)
+psi.ver<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "verosi",difmin = 0.0001,t=0)
 psi.rel
 psi.ang
 psi.ver
