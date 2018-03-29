@@ -10,67 +10,56 @@ install.packages("mixtools") #Mixtools package for drawing the elipse
 install.packages("MASS") #MASS pachake for calculating bivariate normal probability
 install.packages("ggplot2")
 
-##Packages
+##Packages ----
 library(mixtools)
 library(MASS)
 library(ggplot2)
 
-##DataSet----
-data(faithful)
-str(faithful)
-x<-faithful
-ggplot(faithful,aes(waiting,eruptions))+
-  geom_point()
-View(faithful)
-
-ggplot(faithful,aes(waiting,1))+
-  geom_point()+
-  stat_function(fun = dnorm,n = 101, args = list(mean=mean(x$eruptions),sd=sd(x$eruptions)))
 
 # EM 1-D Algorithm ----
 
 #Funcion Pasos EM
-EMSteps<-function(x, g, psi){
+EMSteps<-function(x, g, psi,m){
   psi.t<-psi
   # M Step Estimate PI
   for (i in 1:(g-1)) {
-    t<-numeric(length(x))
+    t<-numeric(length(x[,1]))
     #Compute Bayes Probability Formula
-    t<-(psi[i,"p"]*dnorm(x,mean = psi[i,"mu"],
+    t<-(psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],
                          sd = sqrt(psi[i,"sig"])))
-    for (j in 1:length(x)) {
+    for (j in 1:length(x[,1])) {
       a<-numeric(1)
       for (w in ((1:g))) {
-        a<-a+(psi[w,"p"]*dnorm(x[j],mean = psi[w,"mu"],
+        a<-a+(psi[w,"p"]*dnorm(x[j,1],mean = psi[w,"mu"],
                                sd = sqrt(psi[w,"sig"])))
       }
       t[j]<-t[j]/a
     }
     #Estimate pi
-    psi.t[i,"p"]=sum(t)/length(x)
+    psi.t[i,"p"]=sum(t)/length(x[,1])
     # estimate mu
-    psi.t[i,"mu"]<-(t%*%x)/(sum(t))
+    psi.t[i,"mu"]<-(t%*%x[,1])/(sum(t))
     # estimate sigma
-    psi.t[i,"sig"]<-(t%*%((x-psi.t[i,"mu"])^2))/(sum(t))
+    psi.t[i,"sig"]<-(t%*%((x[,1]-psi.t[i,"mu"])^2))/(sum(t))
   }
   psi.t[g,"p"]=1-sum(psi.t[-g,"p"])
   # E Step Estimate mu & sigma
   i<-g
-  t<-numeric(length(x))
-  t<-(psi[i,"p"]*dnorm(x,mean = psi[i,"mu"],
+  t<-numeric(length(x[,1]))
+  t<-(psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],
                        sd = sqrt(psi[i,"sig"])))
-  for (j in 1:length(x)) {
+  for (j in 1:length(x[,1])) {
     a<-numeric(1)
     for (w in ((1:g))) {
-      a<-a+(psi[w,"p"]*dnorm(x[j],mean = psi[w,"mu"],
+      a<-a+(psi[w,"p"]*dnorm(x[j,1],mean = psi[w,"mu"],
                              sd = sqrt(psi[w,"sig"])))
     }
     t[j]<-t[j]/a
   }
   # estimate mu
-  psi.t[i,"mu"]<-(t%*%x)/(sum(t))
+  psi.t[i,"mu"]<-(t%*%x[,1])/(sum(t))
   # estimate sigma
-  psi.t[i,"sig"]<-(t%*%((x-psi.t[i,"mu"])^2))/(sum(t))
+  psi.t[i,"sig"]<-(t%*%((x[,1]-psi.t[i,"mu"])^2))/(sum(t))
   
   #Model Plot--
   rainbowcols <- rainbow(g)
@@ -80,9 +69,9 @@ EMSteps<-function(x, g, psi){
                                                         sd=sqrt(psi.t[i,"sig"])),
                        color=rainbowcols[i]),d)
   }
-  plot1<-ggplot(data.frame(i<-c(1:length(x)),x),aes(x,-0.005))+
+  plot1<-ggplot(x,aes(waiting,-0.005))+
           geom_point() + d + ylab("")+theme(
-            panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1)
+            panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1)+ggtitle(label = "Iteración",subtitle = m)
   #End Plot--
   plot(plot1)
   return(psi.t)
@@ -92,7 +81,7 @@ EMSteps<-function(x, g, psi){
 maxver<-function(x,g,psi){
   a<-data.frame(i=c(1:length(x)))
   for (i in 1:g) {
-    a<-cbind(a,psi[i,"p"]*dnorm(x,mean = psi[i,"mu"],sd = sqrt(psi[i,"sig"])))
+    a<-cbind(a,psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],sd = sqrt(psi[i,"sig"])))
     colnames(a)[i+1]=as.character(i)
   }
   s<-prod(apply(a[,-1],MARGIN = 2 ,FUN = sum))
@@ -114,9 +103,9 @@ angle <- function(x,y){
 #   y metodo de convergencia (relativo,angulo,maxvers),
 #   diferencia minima de paro
 
-EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t) {
-  psi.t<-EMSteps(x = dato,g = g,psi = psi)
+EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
   a<-t+1
+  psi.t<-EMSteps(x = dato,g = g,psi = psi,m = a)
   if (metodo=="relativo") {
     if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*3))>0) {
       psi<-psi.t
@@ -144,9 +133,3 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t) {
     }
   } else {print("No se definio correctamente el metodo")}
 }
-
-
-
-
-
-

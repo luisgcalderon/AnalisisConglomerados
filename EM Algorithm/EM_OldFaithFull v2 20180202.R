@@ -10,7 +10,7 @@ install.packages("mixtools") #Mixtools package for drawing the elipse
 install.packages("MASS") #MASS pachake for calculating bivariate normal probability
 install.packages("ggplot2")
 
-##Packages
+##Packages ---- 
 library(mixtools)
 library(MASS)
 library(ggplot2)
@@ -28,7 +28,7 @@ ggplot(faithful,aes(waiting,0))+
   stat_function(fun = dnorm,n = 100, args = list(mean=mean(x$waiting),sd=sd(x$waiting)))
 
 # Data to Model ----
-x<-faithful$waiting
+x<-faithful["waiting"]
 # Parameters of the Mixture Model
 p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
 g<-(length(p)) #Componentes del Modelo 
@@ -44,21 +44,21 @@ for (i in 1:g) {
                                                       sd=sqrt(psi[i,"sig"])),
                      color=rainbowcols[i]),d)
 }
-
-plot1<-ggplot(data.frame(i<-c(1:length(x)),x),aes(x,-0.005))+
+plot1<-ggplot(x,aes(waiting,-0.005))+
   geom_point() + d + theme(
-    panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1) + ylab("")
+    panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1) + ylab("")+ggtitle("Data Viejo Fiel")
 plot(plot1)
 
-psi.t<-EMSteps(x,g,psi)
-psi.t1<-EMSteps(x,g,psi.t)
+# Application EM ----
+psi.t<-EMSteps(x,g,psi,0)
+psi.t1<-EMSteps(x,g,psi.t,1)
 psi.t2<-EMSteps(x,g,psi.t1)
 psi.t3<-EMSteps(x,g,psi.t2)
 psi.t4<-EMSteps(x,g,psi.t3)
 #relativo, angulo, verosi
 psi.rel<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001,t = 0)
 psi.ang<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "angulo",difmin = 0.0001,t=0)
-psi.ver<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "verosi",difmin = 0.0001,t=0)
+psi.ver<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "verosi",difmin = 0.00001,t=0)
 psi.rel
 psi.ang
 psi.ver
