@@ -23,15 +23,16 @@ p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
 g<-(length(p)) #Componentes del Modelo 
 
 # Initial Parameters of the Normal Distribution
-mu1 <- c(52,82); mu2<- c(1.5,3)
-sig1<- c(16,16); sig2<-c(1,1.6) # Parametros Mu y Sigma respectivamente
+# (x,y)
+mu1 <- c(52,1.5); mu2<- c(82,3)
+sig1<- c(16,1); sig2<-c(16,1.6) # Parametros Mu y Sigma respectivamente
 rho1<-c(3);rho2<-c(4) # Coeficiente de correlación
 Sig1<-matrix(c(sig1[1],rho1*sqrt(sig1[1]*sig1[2]),rho1*sqrt(sig1[1]*sig1[2]),sig1[2]),
              nrow = 2,byrow = T)
 Sig2<-matrix(c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2]),
              nrow = 2,byrow = T)
 
-psi<-data.frame(p,mu=c(mu1,mu2),Sig=c(Sig1,Sig2))
+psi<-data.frame(p,mu=data.frame(mu1,mu2),Sig=data.frame(Sig1,Sig2))
 psi
 
 # EM Multivariate Algorithm ----
