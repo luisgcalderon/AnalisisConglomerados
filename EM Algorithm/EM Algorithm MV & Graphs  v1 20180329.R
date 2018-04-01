@@ -24,76 +24,55 @@ g<-(length(p)) #Componentes del Modelo
 
 # Initial Parameters of the Normal Distribution
 # (x,y)
-mu1 <- c(52,1.5); mu2<- c(82,3)
-sig1<- c(16,1); sig2<-c(16,1.6) # Parametros Mu y Sigma respectivamente
-rho1<-c(3);rho2<-c(4) # Coeficiente de correlación
-Sig1<-matrix(c(sig1[1],rho1*sqrt(sig1[1]*sig1[2]),rho1*sqrt(sig1[1]*sig1[2]),sig1[2]),
-             nrow = 2,byrow = T)
-Sig2<-matrix(c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2]),
-             nrow = 2,byrow = T)
-
-psi<-data.frame(p,mu=data.frame(mu1,mu2),Sig=data.frame(Sig1,Sig2))
-psi
+mu1 <- c(1.5,52); mu2<- c(3,82)
+sig1<- c(1.2,184); sig2<-c(1.6,182) # Parametros Mu y Sigma respectivamente
+rho1<-c(0.5);rho2<-c(0.5) # Coeficiente de correlación
+Sig1<-c(sig1[1],rho1*sqrt(sig1[1]*sig1[2]),rho1*sqrt(sig1[1]*sig1[2]),sig1[2])
+Sig2<-c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2])
+apply(x,2,var)
+psi<-list(p=p,mu=list(mu1=mu1,mu2=mu2),Sig=list(Sig1=Sig1,Sig2=Sig2))
 
 # EM Multivariate Algorithm ----
 #Funcion Pasos EM
-EMSteps<-function(x, g, psi,m){
+
+EMStepsMV<-function(x, g, psi, q){
+  m<-dim(x)[2] #dimension de x
+  n<-dim(x)[1] #numero de observaciones
   psi.t<-psi
-  # M Step Estimate PI
-  for (i in 1:(g-1)) {
-    t<-numeric(length(x[,1]))
-    #Compute Bayes Probability Formula
-    t<-(psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],
-                         sd = sqrt(psi[i,"sig"])))
-    for (j in 1:length(x[,1])) {
+  for (i in 1:g) {
+    t<-numeric(n)
+    t<-psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
+                          matrix(data = unlist(psi$Sig[i]),nrow=m))
+    for (j in 1:n) {
       a<-numeric(1)
-      for (w in ((1:g))) {
-        a<-a+(psi[w,"p"]*dnorm(x[j,1],mean = psi[w,"mu"],
-                               sd = sqrt(psi[w,"sig"])))
+      for (w in 1:g) {
+        a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = unlist(psi$mu[w]),sigma = 
+                                matrix(data = unlist(psi$Sig[w]),nrow = m))
+        
       }
       t[j]<-t[j]/a
     }
-    #Estimate pi
-    psi.t[i,"p"]=sum(t)/length(x[,1])
-    # estimate mu
-    psi.t[i,"mu"]<-(t%*%x[,1])/(sum(t))
-    # estimate sigma
-    psi.t[i,"sig"]<-(t%*%((x[,1]-psi.t[i,"mu"])^2))/(sum(t))
-  }
-  psi.t[g,"p"]=1-sum(psi.t[-g,"p"])
-  # E Step Estimate mu & sigma
-  i<-g
-  t<-numeric(length(x[,1]))
-  t<-(psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],
-                       sd = sqrt(psi[i,"sig"])))
-  for (j in 1:length(x[,1])) {
-    a<-numeric(1)
-    for (w in ((1:g))) {
-      a<-a+(psi[w,"p"]*dnorm(x[j,1],mean = psi[w,"mu"],
-                             sd = sqrt(psi[w,"sig"])))
+    if (i<g){
+      psi.t$p[i]<-sum(t)/n} else{
+        psi.t$p[i]<-1-sum(psi.t$p[-i])
+      }
+    #estimacion de mu
+    psi.t$mu[i]<-list(as.numeric(t%*%as.matrix(x)/sum(t)))
+    #estimacion de sig
+    txn<-x
+    xn<-x
+    for (j in 1:m) {
+      xn[,j]<-(x[,j]-unlist(psi.t$mu[i])[j])
+      txn[,j]<-t*xn[,j]
     }
-    t[j]<-t[j]/a
+    psi$Sig[i]<-list(as.numeric(
+      (t(as.matrix(txn))%*%(as.matrix(xn)))/sum(t)))
   }
-  # estimate mu
-  psi.t[i,"mu"]<-(t%*%x[,1])/(sum(t))
-  # estimate sigma
-  psi.t[i,"sig"]<-(t%*%((x[,1]-psi.t[i,"mu"])^2))/(sum(t))
-  
-  #Model Plot--
-  rainbowcols <- rainbow(g)
-  d<-list()
-  for (i in 1:g) {
-    d<-c(stat_function(fun = dnorm,n = 100, args = list(mean=psi.t[i,"mu"],
-                                                        sd=sqrt(psi.t[i,"sig"])),
-                       color=rainbowcols[i]),d)
-  }
-  plot1<-ggplot(x,aes(waiting,-0.005))+
-    geom_point() + d + ylab("")+theme(
-      panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1)+ggtitle(label = "Iteración",subtitle = m)
-  #End Plot--
-  plot(plot1)
   return(psi.t)
 }
+
+EMStepsMV(x,2,psi,1)
+
 
 # Función Calcular Densidad de Maxima Versomilitud
 maxver<-function(x,g,psi){
