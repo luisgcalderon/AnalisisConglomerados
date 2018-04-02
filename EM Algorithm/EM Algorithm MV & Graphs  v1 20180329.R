@@ -7,15 +7,14 @@
 rm(list=ls())
 
 ## Installation of Packages----
-install.packages("mvtnorm") #mvtnorm package for calculating multivariate normal probability
-install.packages("ggplot2")
+#install.packages("mvtnorm") #mvtnorm package for calculating multivariate normal probability
+#install.packages("ggplot2")
 
 ##Packages ----
 library(mvtnorm)
 library(ggplot2)
-v<-var(x)
-class(v)
-#Parametros ponderados, media, sigma, coeficiente de correlacion
+
+#Parametros ponderados, media, sigma, coeficiente de correlacion----
 x<-faithful
 n<-dim(x)[2]
 # Parameters of the Mixture Model
@@ -65,13 +64,34 @@ EMStepsMV<-function(x, g, psi, q){
       xn[,j]<-(x[,j]-unlist(psi.t$mu[i])[j])
       txn[,j]<-t*xn[,j]
     }
-    psi$Sig[i]<-list(as.numeric(
+    psi.t$Sig[i]<-list(as.numeric(
       (t(as.matrix(txn))%*%(as.matrix(xn)))/sum(t)))
   }
+  #Graficar
+  raincol<-rainbow(g)
+  a.x<-data.frame(i=1:n)
+  a.y<-data.frame(i=1:n)
+  for (i in 1:g) {
+    a<-rmvnorm(n,mean=unlist(psi.t$mu[i]),
+               sigma=matrix(data = unlist(psi.t$Sig[i]),nrow = m))
+    a.x[,i]<-a[,1]
+    a.y[,i]<-a[,2]
+  }
+
+  g.p<-ggplot(x,aes(waiting,eruptions))+
+  geom_point()+ggtitle("EM MV",subtitle = paste("Iteracion",q,sep=" "))+
+    stat_ellipse(aes(a.y[,1],a.x[,1]),colour=raincol[1])+
+    stat_ellipse(aes(a.y[,2],a.x[,2]),colour=raincol[2])
+  plot(g.p)  
   return(psi.t)
 }
 
-EMStepsMV(x,2,psi,1)
+psi.t1<-EMStepsMV(x,2,psi,1)
+psi.t2<-EMStepsMV(x,2,psi.t1,2)
+psi.t3<-EMStepsMV(x,2,psi.t2,3)
+psi.t4<-EMStepsMV(x,2,psi.t3,4)
+psi.t5<-EMStepsMV(x,2,psi.t4,5)
+
 
 
 # Función Calcular Densidad de Maxima Versomilitud
