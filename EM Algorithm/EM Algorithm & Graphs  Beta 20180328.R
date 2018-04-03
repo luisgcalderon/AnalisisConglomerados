@@ -6,7 +6,7 @@
 rm(list=ls())
 
 ## Installation of Packages----
-install.packages("ggplot2")
+#install.packages("ggplot2")
 
 ##Packages ----
 library(ggplot2)
@@ -120,7 +120,7 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
       return(psi.t)
     }
   } else if (metodo=="verosi") {
-    if (maxver(x = dato,g = g,psi = psi.t)-maxver(x = dato,g = g,psi = psi)>difmin){
+    if (abs(maxver(x = dato,g = g,psi = psi.t)-maxver(x = dato,g = g,psi = psi))>difmin){
       psi<-psi.t
       EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
     }else{
