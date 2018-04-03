@@ -59,6 +59,14 @@ psi.t4<-EMSteps(x,g,psi.t3)
 psi.rel<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001,t = 0)
 psi.ang<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "angulo",difmin = 0.0001,t=0)
 psi.ver<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "verosi",difmin = 0.00001,t=0)
+
 psi.rel
 psi.ang
 psi.ver
+
+#calculo de verosimilitud
+maxver(x,2,psi)
+maxver(x,2,psi.rel)
+maxver(x,2,psi.ang)
+maxver(x,2,psi.ver)
+
