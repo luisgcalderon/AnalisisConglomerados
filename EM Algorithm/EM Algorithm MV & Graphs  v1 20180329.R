@@ -32,7 +32,9 @@ apply(x,2,var)
 psi<-list(p=p,mu=list(mu1=mu1,mu2=mu2),Sig=list(Sig1=Sig1,Sig2=Sig2))
 
 # EM Multivariate Algorithm ----
-#Funcion Pasos EM
+
+# Funcion Pasos EM 
+# Nota: Modificar Proceso de Graficacion
 
 EMStepsMV<-function(x, g, psi, q){
   m<-dim(x)[2] #dimension de x
@@ -95,10 +97,12 @@ psi.t5<-EMStepsMV(x,2,psi.t4,5)
 
 
 # Función Calcular Densidad de Maxima Versomilitud
-maxver<-function(x,g,psi){
+maxverMV<-function(x,g,psi){
+  m<-dim(x)[1]
   a<-data.frame(i=c(1:length(x)))
   for (i in 1:g) {
-    a<-cbind(a,psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],sd = sqrt(psi[i,"sig"])))
+    a<-cbind(a,psi$p[i]*dmvnorm(x,mean = unlist(psi$mu[i]),sigma = 
+                                  matrix(data = unlist(psi$Sig[i]),nrow=m)))
     colnames(a)[i+1]=as.character(i)
   }
   s<-prod(apply(a[,-1],MARGIN = 2 ,FUN = sum))
@@ -120,14 +124,14 @@ angle <- function(x,y){
 #   y metodo de convergencia (relativo,angulo,maxvers),
 #   diferencia minima de paro
 
-EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
+EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0) {
   a<-t+1
-  psi.t<-EMSteps(x = dato,g = g,psi = psi,m = a)
+  m<-dim(x)[2]
+  psi.t<-EMStepsMV(x = dato,g = g,psi = psi,q = a)
   if (metodo=="relativo") {
-    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*3))>0) {
+    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*(1+m*(1+m)))>0)) {
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)} else{
-        print(a)
+      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)} else{
         return(psi.t)
       }
   } else if (metodo=="angulo"){
@@ -137,16 +141,15 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
       psi<-psi.t
       EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
     }else{
-      print(a)
       return(psi.t)
     }
   } else if (metodo=="verosi") {
-    if (maxver(x = dato,g = g,psi = psi.t)-maxver(x = dato,g = g,psi = psi)>difmin){
+    if (maxverMV(dato,g = g,psi = psi.t)-maxverMV(dato,g = g,psi = psi)>difmin){
       psi<-psi.t
       EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
     }else{
-      print(a)
       return(psi.t)
     }
   } else {print("No se definio correctamente el metodo")}
 }
+
