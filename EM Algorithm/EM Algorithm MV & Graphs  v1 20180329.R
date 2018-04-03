@@ -28,10 +28,34 @@ sig1<- c(1.2,184); sig2<-c(1.6,182) # Parametros Mu y Sigma respectivamente
 rho1<-c(0.5);rho2<-c(0.5) # Coeficiente de correlación
 Sig1<-c(sig1[1],rho1*sqrt(sig1[1]*sig1[2]),rho1*sqrt(sig1[1]*sig1[2]),sig1[2])
 Sig2<-c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2])
-apply(x,2,var)
+#apply(x,2,var)
 psi<-list(p=p,mu=list(mu1=mu1,mu2=mu2),Sig=list(Sig1=Sig1,Sig2=Sig2))
 
 # EM Multivariate Algorithm ----
+
+#Graficar
+
+PlotEM_MV<-function(x,g,psi,q){
+  #Graficar
+  n<-dim(x)[1]
+  m<-dim(x)[2]
+  raincol<-rainbow(g)
+  a.x<-data.frame(i=1:n)
+  a.y<-data.frame(i=1:n)
+  for (i in 1:g) {
+    a<-rmvnorm(n,mean=unlist(psi.t$mu[i]),
+               sigma=matrix(data = unlist(psi.t$Sig[i]),nrow = m))
+    a.x[,i]<-a[,1]
+    a.y[,i]<-a[,2]
+  }
+  
+  g.p<-ggplot(x,aes(waiting,eruptions))+
+    geom_point()+ggtitle("EM MV",subtitle = paste("Iteracion",q,sep=" "))+
+    stat_ellipse(aes(a.y[,1],a.x[,1]),colour=raincol[1])+
+    stat_ellipse(aes(a.y[,2],a.x[,2]),colour=raincol[2])
+  plot(g.p) 
+  return(g.p)
+}
 
 # Funcion Pasos EM 
 # Nota: Modificar Proceso de Graficacion
@@ -69,22 +93,8 @@ EMStepsMV<-function(x, g, psi, q){
     psi.t$Sig[i]<-list(as.numeric(
       (t(as.matrix(txn))%*%(as.matrix(xn)))/sum(t)))
   }
-  #Graficar
-  raincol<-rainbow(g)
-  a.x<-data.frame(i=1:n)
-  a.y<-data.frame(i=1:n)
-  for (i in 1:g) {
-    a<-rmvnorm(n,mean=unlist(psi.t$mu[i]),
-               sigma=matrix(data = unlist(psi.t$Sig[i]),nrow = m))
-    a.x[,i]<-a[,1]
-    a.y[,i]<-a[,2]
-  }
-
-  g.p<-ggplot(x,aes(waiting,eruptions))+
-  geom_point()+ggtitle("EM MV",subtitle = paste("Iteracion",q,sep=" "))+
-    stat_ellipse(aes(a.y[,1],a.x[,1]),colour=raincol[1])+
-    stat_ellipse(aes(a.y[,2],a.x[,2]),colour=raincol[2])
-  plot(g.p)  
+  g.p<-PlotEM_MV(x,g,psi.t,q)
+   
   return(psi.t)
 }
 
@@ -98,10 +108,11 @@ psi.t5<-EMStepsMV(x,2,psi.t4,5)
 
 # Función Calcular Densidad de Maxima Versomilitud
 maxverMV<-function(x,g,psi){
-  m<-dim(x)[1]
-  a<-data.frame(i=c(1:length(x)))
+  n<-dim(x)[1]
+  m<-dim(x)[2]
+  a<-data.frame(i=c(1:n))
   for (i in 1:g) {
-    a<-cbind(a,psi$p[i]*dmvnorm(x,mean = unlist(psi$mu[i]),sigma = 
+    a<-cbind(a,psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
                                   matrix(data = unlist(psi$Sig[i]),nrow=m)))
     colnames(a)[i+1]=as.character(i)
   }
@@ -129,7 +140,7 @@ EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0) {
   m<-dim(x)[2]
   psi.t<-EMStepsMV(x = dato,g = g,psi = psi,q = a)
   if (metodo=="relativo") {
-    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*(1+m*(1+m)))>0)) {
+    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*(1+m*(1+m))))>0) {
       psi<-psi.t
       EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)} else{
         return(psi.t)
@@ -139,17 +150,29 @@ EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0) {
     z<-unlist(psi[-1])
     if (abs(angle(w,z))>difmin){
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
     }else{
       return(psi.t)
     }
   } else if (metodo=="verosi") {
     if (maxverMV(dato,g = g,psi = psi.t)-maxverMV(dato,g = g,psi = psi)>difmin){
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
     }else{
       return(psi.t)
     }
   } else {print("No se definio correctamente el metodo")}
 }
 
+PlotEM_MV(x,g,psi,0)
+psi.rel<-EMAlgorithmMV(x,2,psi,"relativo",0.0001)
+psi.angle<-EMAlgorithmMV(x,2,psi,"angulo",0.0001)
+psi.vero<-EMAlgorithmMV(x,2,psi,"verosi",0.0001)
+
+#Calculo de Verosimilitud
+maxverMV(x,2,psi)
+maxverMV(x,2,psi.rel)
+maxverMV(x,2,psi.angle)
+maxverMV(x,2,psi.vero)
+
+psi[-1]
