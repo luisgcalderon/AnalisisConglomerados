@@ -43,8 +43,8 @@ PlotEM_MV<-function(x,g,psi,q){
   a.x<-data.frame(i=1:n)
   a.y<-data.frame(i=1:n)
   for (i in 1:g) {
-    a<-rmvnorm(n,mean=unlist(psi.t$mu[i]),
-               sigma=matrix(data = unlist(psi.t$Sig[i]),nrow = m))
+    a<-rmvnorm(n,mean=unlist(psi$mu[i]),
+               sigma=matrix(data = unlist(psi$Sig[i]),nrow = m))
     a.x[,i]<-a[,1]
     a.y[,i]<-a[,2]
   }
