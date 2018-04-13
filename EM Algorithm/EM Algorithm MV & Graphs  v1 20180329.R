@@ -98,11 +98,11 @@ EMStepsMV<-function(x, g, psi, q){
   return(psi.t)
 }
 
-psi.t1<-EMStepsMV(x,2,psi,1)
-psi.t2<-EMStepsMV(x,2,psi.t1,2)
-psi.t3<-EMStepsMV(x,2,psi.t2,3)
-psi.t4<-EMStepsMV(x,2,psi.t3,4)
-psi.t5<-EMStepsMV(x,2,psi.t4,5)
+# psi.t1<-EMStepsMV(x,2,psi,1)
+# psi.t2<-EMStepsMV(x,2,psi.t1,2)
+# psi.t3<-EMStepsMV(x,2,psi.t2,3)
+# psi.t4<-EMStepsMV(x,2,psi.t3,4)
+# psi.t5<-EMStepsMV(x,2,psi.t4,5)
 
 
 
