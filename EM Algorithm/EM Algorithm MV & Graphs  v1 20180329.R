@@ -16,7 +16,6 @@ library(ggplot2)
 
 #Parametros ponderados, media, sigma, coeficiente de correlacion----
 x<-faithful
-n<-dim(x)[2]
 # Parameters of the Mixture Model
 p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
 g<-(length(p)) #Componentes del Modelo 
