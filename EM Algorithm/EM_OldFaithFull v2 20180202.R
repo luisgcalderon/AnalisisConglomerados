@@ -31,14 +31,14 @@ p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
 g<-(length(p)) #Componentes del Modelo 
 # Initial Parameters of the Normal Distribution
 mu <- c(52,82); sig<- c(16,16) # Parametros Mu y Sigma respectivamente
-psi<-data.frame(p,mu,sig)
+psi<-list(p=p,mu=mu,sig=sig)
 
 # Plot EM ----
 rainbowcols <- rainbow(g)
 d<-list()
 for (i in 1:g) {
-  d<-c(stat_function(fun = dnorm,n = 100, args = list(mean=psi[i,"mu"],
-                                                      sd=sqrt(psi[i,"sig"])),
+  d<-c(stat_function(fun = dnorm,n = 100, args = list(mean=psi$mu[i],
+                                                      sd=sqrt(psi$sig[i])),
                      color=rainbowcols[i]),d)
 }
 plot1<-ggplot(x,aes(waiting,-0.005))+
@@ -49,13 +49,14 @@ plot(plot1)
 # Application EM ----
 psi.t<-EMSteps(x,g,psi,0)
 psi.t1<-EMSteps(x,g,psi.t,1)
-psi.t2<-EMSteps(x,g,psi.t1)
-psi.t3<-EMSteps(x,g,psi.t2)
-psi.t4<-EMSteps(x,g,psi.t3)
+psi.t2<-EMSteps(x,g,psi.t1,2)
+psi.t3<-EMSteps(x,g,psi.t2,3)
+psi.t4<-EMSteps(x,g,psi.t3,4)
 #relativo, angulo, verosi
 psi.rel<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "relativo",difmin = 0.0001,t = 0)
 psi.ang<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "angulo",difmin = 0.0001,t=0)
 psi.ver<-EMAlgorithm1d(dato = x,g = g,psi = psi,metodo = "verosi",difmin = 0.00001,t=0)
+
 
 psi.rel
 psi.ang

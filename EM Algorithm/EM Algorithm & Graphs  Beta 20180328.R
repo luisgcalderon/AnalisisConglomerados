@@ -21,48 +21,48 @@ EMSteps<-function(x, g, psi,m){
   for (i in 1:(g-1)) {
     t<-numeric(length(x[,1]))
     #Compute Bayes Probability Formula
-    t<-(psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],
-                         sd = sqrt(psi[i,"sig"])))
+    t<-(psi$p[i]*dnorm(x[,1],mean = psi$mu[i],
+                         sd = sqrt(psi$sig[i])))
     for (j in 1:length(x[,1])) {
       a<-numeric(1)
       for (w in ((1:g))) {
-        a<-a+(psi[w,"p"]*dnorm(x[j,1],mean = psi[w,"mu"],
-                               sd = sqrt(psi[w,"sig"])))
+        a<-a+(psi$p[w]*dnorm(x[j,1],mean = psi$mu[w],
+                               sd = sqrt(psi$sig[w])))
       }
       t[j]<-t[j]/a
     }
     #Estimate pi
-    psi.t[i,"p"]=sum(t)/length(x[,1])
+    psi.t$p[i]=sum(t)/length(x[,1])
     # estimate mu
-    psi.t[i,"mu"]<-(t%*%x[,1])/(sum(t))
+    psi.t$mu[i]<-(t%*%x[,1])/(sum(t))
     # estimate sigma
-    psi.t[i,"sig"]<-(t%*%((x[,1]-psi.t[i,"mu"])^2))/(sum(t))
+    psi.t$sig[i]<-(t%*%((x[,1]-psi.t$mu[i])^2))/(sum(t))
   }
-  psi.t[g,"p"]=1-sum(psi.t[-g,"p"])
+  psi.t$p[g]=1-sum(psi.t$p[-g])
   # E Step Estimate mu & sigma
   i<-g
   t<-numeric(length(x[,1]))
-  t<-(psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],
-                       sd = sqrt(psi[i,"sig"])))
+  t<-(psi$p[i]*dnorm(x[,1],mean = psi$mu[i],
+                       sd = sqrt(psi$sig[i])))
   for (j in 1:length(x[,1])) {
     a<-numeric(1)
     for (w in ((1:g))) {
-      a<-a+(psi[w,"p"]*dnorm(x[j,1],mean = psi[w,"mu"],
-                             sd = sqrt(psi[w,"sig"])))
+      a<-a+(psi$p[w]*dnorm(x[j,1],mean = psi$mu[w],
+                             sd = sqrt(psi$sig[w])))
     }
     t[j]<-t[j]/a
   }
   # estimate mu
-  psi.t[i,"mu"]<-(t%*%x[,1])/(sum(t))
+  psi.t$mu[i]<-(t%*%x[,1])/(sum(t))
   # estimate sigma
-  psi.t[i,"sig"]<-(t%*%((x[,1]-psi.t[i,"mu"])^2))/(sum(t))
+  psi.t$sig[i]<-(t%*%((x[,1]-psi.t$mu[i])^2))/(sum(t))
   
   #Model Plot--
   rainbowcols <- rainbow(g)
   d<-list()
   for (i in 1:g) {
-    d<-c(stat_function(fun = dnorm,n = 100, args = list(mean=psi.t[i,"mu"],
-                                                        sd=sqrt(psi.t[i,"sig"])),
+    d<-c(stat_function(fun = dnorm,n = 100, args = list(mean=psi.t$mu[i],
+                                                        sd=sqrt(psi.t$sig[i])),
                        color=rainbowcols[i]),d)
   }
   plot1<-ggplot(x,aes(waiting,-0.005))+
@@ -77,7 +77,7 @@ EMSteps<-function(x, g, psi,m){
 maxver<-function(x,g,psi){
   a<-data.frame(i=c(1:length(x)))
   for (i in 1:g) {
-    a<-cbind(a,psi[i,"p"]*dnorm(x[,1],mean = psi[i,"mu"],sd = sqrt(psi[i,"sig"])))
+    a<-cbind(a,psi$p[i]*dnorm(x[,1],mean = psi$mu[i],sd = sqrt(psi$sig[i])))
     colnames(a)[i+1]=as.character(i)
   }
   s<-prod(apply(a[,-1],MARGIN = 2 ,FUN = sum))
