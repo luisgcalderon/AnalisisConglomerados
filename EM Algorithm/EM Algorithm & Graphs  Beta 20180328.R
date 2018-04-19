@@ -15,7 +15,7 @@ library(ggplot2)
 # EM 1-D Algorithm ----
 
 #Funcion Pasos EM
-EMSteps<-function(x, g, psi,m){
+EMSteps<-function(x, g, psi,m,graf=0){
   psi.t<-psi
   # M Step Estimate PI
   for (i in 1:(g-1)) {
@@ -56,7 +56,7 @@ EMSteps<-function(x, g, psi,m){
   psi.t$mu[i]<-(t%*%x[,1])/(sum(t))
   # estimate sigma
   psi.t$sig[i]<-(t%*%((x[,1]-psi.t$mu[i])^2))/(sum(t))
-  
+  if (graf==1){
   #Model Plot--
   rainbowcols <- rainbow(g)
   d<-list()
@@ -70,6 +70,7 @@ EMSteps<-function(x, g, psi,m){
             panel.background = element_rect(fill = "white"))+ylim(-0.01,0.1)+ggtitle(label = "Iteración",subtitle = m)
   #End Plot--
   plot(plot1)
+  }
   return(psi.t)
 }
 
@@ -99,13 +100,13 @@ angle <- function(x,y){
 #   y metodo de convergencia (relativo,angulo,maxvers),
 #   diferencia minima de paro
 
-EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
+EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0,graf=0) {
   a<-t+1
-  psi.t<-EMSteps(x = dato,g = g,psi = psi,m = a)
+  psi.t<-EMSteps(x = dato,g = g,psi = psi,m = a,graf=graf)
   if (metodo=="relativo") {
     if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*3))>0) {
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)} else{
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)} else{
         print(a)
         return(psi.t)
       }
@@ -114,7 +115,7 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
     z<-unlist(psi[-1])
     if (abs(angle(w,z))>difmin){
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)
     }else{
       print(a)
       return(psi.t)
@@ -122,7 +123,7 @@ EMAlgorithm1d<-function(dato,g,psi,metodo,difmin,t=0) {
   } else if (metodo=="verosi") {
     if (abs(maxver(x = dato,g = g,psi = psi.t)-maxver(x = dato,g = g,psi = psi))>difmin){
       psi<-psi.t
-      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+      EMAlgorithm1d(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)
     }else{
       print(a)
       return(psi.t)

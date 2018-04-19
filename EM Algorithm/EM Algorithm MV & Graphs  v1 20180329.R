@@ -59,7 +59,7 @@ PlotEM_MV<-function(x,g,psi,q){
 # Funcion Pasos EM 
 # Nota: Modificar Proceso de Graficacion
 
-EMStepsMV<-function(x, g, psi, q){
+EMStepsMV<-function(x, g, psi, q,graf=0){
   m<-dim(x)[2] #dimension de x
   n<-dim(x)[1] #numero de observaciones
   psi.t<-psi
@@ -92,8 +92,9 @@ EMStepsMV<-function(x, g, psi, q){
     psi.t$Sig[i]<-list(as.numeric(
       (t(as.matrix(txn))%*%(as.matrix(xn)))/sum(t)))
   }
+  if (graf==1){
   g.p<-PlotEM_MV(x,g,psi.t,q)
-   
+  }
   return(psi.t)
 }
 
@@ -134,14 +135,14 @@ angle <- function(x,y){
 #   y metodo de convergencia (relativo,angulo,maxvers),
 #   diferencia minima de paro
 
-EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0) {
+EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0,graf=0) {
   a<-t+1
   m<-dim(x)[2]
-  psi.t<-EMStepsMV(x = dato,g = g,psi = psi,q = a)
+  psi.t<-EMStepsMV(x = dato,g = g,psi = psi,q = a,graf = graf)
   if (metodo=="relativo") {
     if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*(1+m*(1+m))))>0) {
       psi<-psi.t
-      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)} else{
+      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)} else{
         return(psi.t)
       }
   } else if (metodo=="angulo"){
@@ -149,14 +150,14 @@ EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0) {
     z<-unlist(psi[-1])
     if (abs(angle(w,z))>difmin){
       psi<-psi.t
-      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)
     }else{
       return(psi.t)
     }
   } else if (metodo=="verosi") {
     if (maxverMV(dato,g = g,psi = psi.t)-maxverMV(dato,g = g,psi = psi)>difmin){
       psi<-psi.t
-      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a)
+      EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)
     }else{
       return(psi.t)
     }
@@ -164,7 +165,7 @@ EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0) {
 }
 
 PlotEM_MV(x,g,psi,0)
-psi.rel<-EMAlgorithmMV(x,2,psi,"relativo",0.0001)
+psi.rel<-EMAlgorithmMV(x,2,psi,"relativo",0.0001,graf = 1)
 psi.angle<-EMAlgorithmMV(x,2,psi,"angulo",0.0001)
 psi.vero<-EMAlgorithmMV(x,2,psi,"verosi",0.0001)
 
