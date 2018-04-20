@@ -50,7 +50,17 @@ DeMatrix<-data.frame(matrix(data = c(IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo=
 
 
 #Step4 Pairwise comparison Matrices for each Criterio
+MatrizCriteriosEjem <- read.csv("Modelo AHP/MatrizCriteriosEjemplo.csv")
+MatrizCriteriosEjem[,-1]<-1/MatrizCriteriosEjem[,-1]*100
+View(MatrizCriteriosEjem)
+PairwiseComparisonMatri<-array(data=0,dim = c(4,4,5))
 #AIC
+for (i in 1:5) {
+  for (j in 1:4) {
+    PairwiseComparisonMatri[j,,i]<-MatrizCriteriosEjem[j,i+1]/MatrizCriteriosEjem[,i+1]
+  }
+}
+PairwiseComparisonMatri[,,5]
 
 #AWE
 #BIC
