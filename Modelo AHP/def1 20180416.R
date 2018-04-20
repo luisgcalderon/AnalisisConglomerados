@@ -3,20 +3,6 @@
 #Analisis de Conglomerados
 #Luis Gerardo Calderon Contreras
 
-#Proposed Pairwise Comparison Matrix
-
-ProposedPairwiseComparisonMatrix <- read.csv("Modelo AHP/ProposedPairwiseComparisonMatrix.csv")
-colnames(ProposedPairwiseComparisonMatrix)
-CriterionMatrix<-as.matrix(ProposedPairwiseComparisonMatrix[,-1])
-
-
-#Normalizar Matriz
-sumc<-apply(CriterionMatrix,2,sum)
-NMatrix<-CriterionMatrix
-for (i in 1:(dim(CriterionMatrix)[1])) {
-  NMatrix[i,]<-CriterionMatrix[i,]/sumc
-}
-apply(NMatrix,1,mean)
 
 #AHP Model Analysis----
 
@@ -87,4 +73,21 @@ for(i in 1:5){
   MCRIV[,i]<-apply(NormPairwiseComparisonMatri[,,i],1,mean)
 }
 MCRIV
-#Step6 Highest C-RIV
+#Step6 Highest C-RIV----
+
+#Proposed Pairwise Comparison Matrix
+
+PropPairCompMatrix <- read.csv("Modelo AHP/ProposedPairwiseComparisonMatrix.csv")
+colnames(PropPairCompMatrix)
+CriterionMatrix<-as.matrix(PropPairCompMatrix[,-1])
+
+
+#Normalizar Matriz
+sumc<-apply(CriterionMatrix,2,sum)
+NMatrix<-CriterionMatrix
+for (i in 1:(dim(CriterionMatrix)[1])) {
+  NMatrix[i,]<-CriterionMatrix[i,]/sumc
+}
+CRIV_Criterion<-apply(NMatrix,1,mean)
+CRIV<-as.matrix(MCRIV)%*%as.matrix(CRIV_Criterion)
+
