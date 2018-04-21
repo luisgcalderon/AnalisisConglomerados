@@ -14,6 +14,7 @@ library(factoextra) # clustering visualization
 library(dendextend) # for comparing two dendrograms
 
 df <- USArrests
+old<-faithful
 df <- na.omit(df)
 df <- scale(df)
 head(df)
@@ -21,10 +22,14 @@ head(df)
 distance <- get_dist(df)
 fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
 
-k2 <- kmeans(df, centers = 2, nstart = 25)
-str(k2)
-df[which(k2$cluster==2),]
+# K-means
+# Inputs: DataSet, and K
+k<-2
+KSet <- kmeans(old, centers = k, nstart = 25)
 
+for (i in 1:k)
+x<-old[KSet$cluster==i,]
+as.matrix(t(x))%*%as.matrix(x)/dim(x)[1]
 
-
+k$centers
   
