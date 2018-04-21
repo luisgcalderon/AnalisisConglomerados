@@ -31,20 +31,21 @@ psi.5<-EMAlgorithmMV(dato = x,g = 5,psi = psi.5,metodo = "verosi",difmin = 0.001
 
 #Step3 Criterion Information Validation----
 
-DeMatrix<-data.frame(matrix(data = c(IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo="ALL"))
+MCriterion<-data.frame(matrix(data = c(IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo="ALL"),IC(x,g,psi,metodo="ALL"))
                             ,nrow = n,ncol = 5,byrow = T)); colnames(DeMatrix)<-c("AIC","AWE","BIC","CLC","KIC");row.names(DeMatrix)<-as.character(g:(g+n-1))
 
 
+AHPClusterAnalysis<-function(MCriterion){
 
 #Step4 Pairwise comparison Matrices for each Criterio----
-MatrizCriteriosEjem <- read.csv("Modelo AHP/MatrizCriteriosEjemplo.csv")
-MatrizCriteriosEjem[,-1]<-1/MatrizCriteriosEjem[,-1]*100
+MCriteriosEj <- read.csv("Modelo AHP/MatrizCriteriosEjemplo.csv")
+MCriteriosEj[,-1]<-1/MCriteriosEj[,-1]*100
 #View(MatrizCriteriosEjem)
-PairwiseComparisonMatri<-array(data=0,dim = c(n,n,5))
+MPairwiseComparison<-array(data=0,dim = c(n,n,5))
 #ALL Pairwise Comparison Matrices
 for (i in 1:5) {
   for (j in 1:4) {
-    PairwiseComparisonMatri[j,,i]<-MatrizCriteriosEjem[j,i+1]/MatrizCriteriosEjem[,i+1]
+    MPairwiseComparison[j,,i]<-MCriteriosEj[j,i+1]/MCriteriosEj[,i+1]
   }
 }
 
@@ -58,11 +59,11 @@ for (i in 1:5) {
 #Step5 Consistency Test C-RIV ----
 
 #Normalizar Matriz
-NormPairwiseComparisonMatri<-array(data=0,dim = c(n,n,5))
+
 for (i in 1:5) {
-  sumc<-apply(PairwiseComparisonMatri[,,i],2,sum)
-  for (j in 1:(dim(PairwiseComparisonMatri[,,i])[1])) {
-    NormPairwiseComparisonMatri[j,,i]<-PairwiseComparisonMatri[j,,i]/sumc
+  sumc<-apply(MPairwiseComparison[,,i],2,sum)
+  for (j in 1:(dim(MPairwiseComparison[,,i])[1])) {
+    MPairwiseComparison[j,,i]<-MPairwiseComparison[j,,i]/sumc
   }
 }
 
@@ -70,24 +71,24 @@ for (i in 1:5) {
 
 MCRIV<-data.frame(matrix(data=0,nrow = n,ncol = 5)); colnames(MCRIV)<-c("AIC","AWE","BIC","CLC","KIC");row.names(MCRIV)<-as.character(g:(g+n-1))
 for(i in 1:5){
-  MCRIV[,i]<-apply(NormPairwiseComparisonMatri[,,i],1,mean)
+  MCRIV[,i]<-apply(MPairwiseComparison[,,i],1,mean)
 }
-MCRIV
 #Step6 Highest C-RIV----
 
 #Proposed Pairwise Comparison Matrix
 
-PropPairCompMatrix <- read.csv("Modelo AHP/ProposedPairwiseComparisonMatrix.csv")
-colnames(PropPairCompMatrix)
-CriterionMatrix<-as.matrix(PropPairCompMatrix[,-1])
+MPropPairCom <- read.csv("Modelo AHP/ProposedPairwiseComparisonMatrix.csv")
+#colnames(MPropPairCom)
+MCriterion<-as.matrix(MPropPairCom[,-1])
 
 
 #Normalizar Matriz
-sumc<-apply(CriterionMatrix,2,sum)
-NMatrix<-CriterionMatrix
-for (i in 1:(dim(CriterionMatrix)[1])) {
-  NMatrix[i,]<-CriterionMatrix[i,]/sumc
-}
-CRIV_Criterion<-apply(NMatrix,1,mean)
-CRIV<-as.matrix(MCRIV)%*%as.matrix(CRIV_Criterion)
+sumc<-apply(MCriterion,2,sum)
 
+for (i in 1:(dim(MCriterion)[1])) {
+  MCriterion[i,]<-MCriterion[i,]/sumc
+}
+CRIV_Criterion<-apply(MCriterion,1,mean)
+CRIV<-as.matrix(MCRIV)%*%as.matrix(CRIV_Criterion)
+return(CRIV)
+}
