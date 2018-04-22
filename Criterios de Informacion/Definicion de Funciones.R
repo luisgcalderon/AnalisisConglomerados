@@ -22,8 +22,8 @@ IC<-function(x,g,psi,metodo){
   n<-dim(x)[1] #numero de observaciones
   t<-numeric(n)
   for (i in 1:g) {
-    t<-t+psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
-                                    matrix(data = unlist(psi$Sig[i]),nrow = m))
+    t<-t+psi$p[i]*dmvnorm(x = x,mean = psi$mu[,i],sigma = 
+                                    matrix(data = psi$Sig[,i],nrow = m))
   }
   FVer<-sum(log(t))
   if (metodo=="AIC"|metodo=="ALL"){
@@ -35,13 +35,13 @@ IC<-function(x,g,psi,metodo){
   if (metodo=="AWE"|metodo=="ALL"){
     mt<-matrix(0,nrow=n,ncol = g)
     for (i in 1:g) {
-      mt[,i]<-psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
-                            matrix(data = unlist(psi$Sig[i]),nrow=m))
+      mt[,i]<-psi$p[i]*dmvnorm(x = x,mean = psi$mu[,i],sigma = 
+                            matrix(data = psi$Sig[,i],nrow=m))
       for (j in 1:n) {
         a<-numeric(1)
         for (w in 1:g) {
-          a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = unlist(psi$mu[w]),sigma = 
-                                  matrix(data = unlist(psi$Sig[w]),nrow = m))
+          a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = psi$mu[,w],sigma = 
+                                  matrix(data = psi$Sig[,w],nrow = m))
           
         }
         mt[j,i]<-mt[j,i]/a
@@ -49,7 +49,9 @@ IC<-function(x,g,psi,metodo){
     }
     ent<-numeric(1)
     for (w in 1:g){
-      ent<-ent+mt[,w]%*%log(mt[,w])
+      lmt<-log(mt[,w])
+      lmt[is.infinite(lmt)]<-0
+      ent<-ent+mt[,w]%*%lmt
     }
   FVerAWE<-(-2)*(FVer-as.numeric(ent))+2*length(unlist(psi))*(3/2+log(n))
     if (metodo=="AWE"){
@@ -66,20 +68,22 @@ IC<-function(x,g,psi,metodo){
     if (metodo=="CLC"){
       mt<-matrix(0,nrow=n,ncol = g)
       for (i in 1:g) {
-        mt[,i]<-psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
-                                  matrix(data = unlist(psi$Sig[i]),nrow=m))
+        mt[,i]<-psi$p[i]*dmvnorm(x = x,mean = psi$mu[,i],sigma = 
+                                  matrix(data = psi$Sig[,i],nrow=m))
         for (j in 1:n) {
           a<-numeric(1)
           for (w in 1:g) {
-            a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = unlist(psi$mu[w]),sigma = 
-                                    matrix(data = unlist(psi$Sig[w]),nrow = m))
+            a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = psi$mu[,w],sigma = 
+                                    matrix(data = psi$Sig[,w],nrow = m))
           }
           mt[j,i]<-mt[j,i]/a
         }
       }
       ent<-numeric(1)
       for (w in 1:g){
-        ent<-ent+mt[,w]%*%log(mt[,w])
+        lmt<-log(mt[,w])
+        lmt[is.infinite(lmt)]<-0
+        ent<-ent+mt[,w]%*%lmt
       }
       FVerCLC<-(-2)*FVer+2*as.numeric(ent)
       return(FVerCLC)
@@ -100,9 +104,9 @@ IC<-function(x,g,psi,metodo){
 }
 
 #Ejemplo
-# IC(x,g,psi,metodo="AIC")
+# IC(x,k,psi.k2,metodo="AIC")
 # IC(x,g,psi,metodo="AWE")
 # IC(x,g,psi,metodo="BIC")
 # IC(x,g,psi,metodo="CLC")
 # IC(x,g,psi,metodo="KIC")
-# IC(x,g,psi,metodo="ALL")
+# IC(x,k,psi.k2,metodo="ALL")
