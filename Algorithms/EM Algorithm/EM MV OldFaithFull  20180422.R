@@ -24,6 +24,7 @@ Sig2<-c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2])
 mu<-array(data=c(mu1,mu2),dim = c(2,2))
 Sig<-array(data = c(Sig1,Sig2),dim = c(4,2))
 
+psi<-list(p=p,mu=mu,Sig=Sig)
 
 # PlotEM_MV(x,g,psi,0)
 # psi.rel<-EMAlgorithmMV(x,2,psi,"relativo",0.0001,graf = 1)

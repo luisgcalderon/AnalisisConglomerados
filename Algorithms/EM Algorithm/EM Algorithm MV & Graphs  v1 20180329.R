@@ -4,7 +4,7 @@
 
 
 ## Clear Environment ----
-rm(list=ls())
+#rm(list=ls())
 
 ## Installation of Packages----
 #install.packages("mvtnorm") #mvtnorm package for calculating multivariate normal probability
