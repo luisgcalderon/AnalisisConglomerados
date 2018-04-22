@@ -14,21 +14,25 @@ rm(list=ls())
 library(mvtnorm)
 library(ggplot2)
 
-#Parametros ponderados, media, sigma, coeficiente de correlacion----
-x<-faithful
-# Parameters of the Mixture Model
-p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
-g<-(length(p)) #Componentes del Modelo 
-
-# Initial Parameters of the Normal Distribution
-# (x,y)
-mu1 <- c(1.5,52); mu2<- c(3,82)
-sig1<- c(1.2,184); sig2<-c(1.6,182) # Parametros Mu y Sigma respectivamente
-rho1<-c(0.5);rho2<-c(0.5) # Coeficiente de correlación
-Sig1<-c(sig1[1],rho1*sqrt(sig1[1]*sig1[2]),rho1*sqrt(sig1[1]*sig1[2]),sig1[2])
-Sig2<-c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2])
-#apply(x,2,var)
-psi<-list(p=p,mu=list(mu1=mu1,mu2=mu2),Sig=list(Sig1=Sig1,Sig2=Sig2))
+# #Parametros ponderados, media, sigma, coeficiente de correlacion----
+# x<-faithful
+# # Parameters of the Mixture Model
+# p<- c(0.5,0.5) #Parametro de Proporcionalidad de las Distribuciones
+# g<-(length(p)) #Componentes del Modelo 
+# 
+# # Initial Parameters of the Normal Distribution
+# # (x,y)
+# mu1 <- c(1.5,52); mu2<- c(3,82)
+# sig1<- c(1.2,184); sig2<-c(1.6,182) # Parametros Mu y Sigma respectivamente
+# rho1<-c(0.5);rho2<-c(0.5) # Coeficiente de correlación
+# Sig1<-c(sig1[1],rho1*sqrt(sig1[1]*sig1[2]),rho1*sqrt(sig1[1]*sig1[2]),sig1[2])
+# Sig2<-c(sig2[1],rho2*sqrt(sig2[1]*sig2[2]),rho2*sqrt(sig2[1]*sig2[2]),sig2[2])
+# 
+# mu<-array(data=c(mu1,mu2),dim = c(2,2))
+# Sig<-array(data = c(Sig1,Sig2),dim = c(4,2))
+# 
+# 
+# psi<-list(p=p,mu=mu,Sig=Sig)
 
 # EM Multivariate Algorithm ----
 
@@ -42,8 +46,8 @@ PlotEM_MV<-function(x,g,psi,q){
   a.x<-data.frame(i=1:n)
   a.y<-data.frame(i=1:n)
   for (i in 1:g) {
-    a<-rmvnorm(n,mean=unlist(psi$mu[i]),
-               sigma=matrix(data = unlist(psi$Sig[i]),nrow = m))
+    a<-rmvnorm(n,mean=psi$mu[,i],
+               sigma=matrix(data = psi$Sig[,i],nrow = m))
     a.x[,i]<-a[,1]
     a.y[,i]<-a[,2]
   }
@@ -65,13 +69,13 @@ EMStepsMV<-function(x, g, psi, q,graf=0){
   psi.t<-psi
   for (i in 1:g) {
     t<-numeric(n)
-    t<-psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
-                          matrix(data = unlist(psi$Sig[i]),nrow=m))
+    t<-psi$p[i]*dmvnorm(x = x,mean = psi$mu[,i],sigma = 
+                          matrix(data = psi$Sig[,i],nrow=m))
     for (j in 1:n) {
       a<-numeric(1)
       for (w in 1:g) {
-        a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = unlist(psi$mu[w]),sigma = 
-                                matrix(data = unlist(psi$Sig[w]),nrow = m))
+        a<-a+psi$p[w]*dmvnorm(x = x[j,],mean = psi$mu[,w],sigma = 
+                                matrix(data = psi$Sig[,w],nrow = m))
         
       }
       t[j]<-t[j]/a
@@ -81,16 +85,16 @@ EMStepsMV<-function(x, g, psi, q,graf=0){
         psi.t$p[i]<-1-sum(psi.t$p[-i])
       }
     #estimacion de mu
-    psi.t$mu[i]<-list(as.numeric(t%*%as.matrix(x)/sum(t)))
+    psi.t$mu[,i]<-as.numeric(t%*%as.matrix(x)/sum(t))
     #estimacion de sig
     txn<-x
     xn<-x
     for (j in 1:m) {
-      xn[,j]<-(x[,j]-unlist(psi.t$mu[i])[j])
+      xn[,j]<-(x[,j]-psi.t$mu[j,i])
       txn[,j]<-t*xn[,j]
     }
-    psi.t$Sig[i]<-list(as.numeric(
-      (t(as.matrix(txn))%*%(as.matrix(xn)))/sum(t)))
+    psi.t$Sig[,i]<-as.numeric(
+      (t(as.matrix(txn))%*%(as.matrix(xn)))/sum(t))
   }
   if (graf==1){
   g.p<-PlotEM_MV(x,g,psi.t,q)
@@ -112,8 +116,8 @@ maxverMV<-function(x,g,psi){
   m<-dim(x)[2]
   a<-data.frame(i=c(1:n))
   for (i in 1:g) {
-    a<-cbind(a,psi$p[i]*dmvnorm(x = x,mean = unlist(psi$mu[i]),sigma = 
-                                  matrix(data = unlist(psi$Sig[i]),nrow=m)))
+    a<-cbind(a,psi$p[i]*dmvnorm(x = x,mean = psi$mu[,i],sigma = 
+                                  matrix(data = psi$Sig[,i],nrow=m)))
     colnames(a)[i+1]=as.character(i)
   }
   s<-prod(apply(a[,-1],MARGIN = 2 ,FUN = sum))
@@ -140,7 +144,7 @@ EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0,graf=0) {
   m<-dim(x)[2]
   psi.t<-EMStepsMV(x = dato,g = g,psi = psi,q = a,graf = graf)
   if (metodo=="relativo") {
-    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,g*(1+m*(1+m))))>0) {
+    if (sum(unlist(psi.t)-unlist(psi)>rep(difmin,length(unlist(psi))))>0) {
       psi<-psi.t
       EMAlgorithmMV(dato = dato,g = g,psi = psi,metodo = metodo, difmin = difmin,t=a,graf=graf)} else{
         return(psi.t)
@@ -164,15 +168,16 @@ EMAlgorithmMV<-function(dato,g,psi,metodo,difmin,t=0,graf=0) {
   } else {print("No se definio correctamente el metodo")}
 }
 
-PlotEM_MV(x,g,psi,0)
-psi.rel<-EMAlgorithmMV(x,2,psi,"relativo",0.0001,graf = 1)
-psi.angle<-EMAlgorithmMV(x,2,psi,"angulo",0.0001)
-psi.vero<-EMAlgorithmMV(x,2,psi,"verosi",0.0001)
+# PlotEM_MV(x,g,psi,0)
+# psi.rel<-EMAlgorithmMV(x,2,psi,"relativo",0.0001,graf = 1)
+# psi.angle<-EMAlgorithmMV(x,2,psi,"angulo",0.0001,graf=1)
+# psi.vero<-EMAlgorithmMV(x,2,psi,"verosi",0.0001,graf=1)
+# 
+# #Calculo de Verosimilitud
+# maxverMV(x,2,psi)
+# maxverMV(x,2,psi.rel)
+# maxverMV(x,2,psi.angle)
+# maxverMV(x,2,psi.vero)
 
-#Calculo de Verosimilitud
-maxverMV(x,2,psi)
-maxverMV(x,2,psi.rel)
-maxverMV(x,2,psi.angle)
-maxverMV(x,2,psi.vero)
 
-psi[-1]
+
