@@ -12,7 +12,7 @@ source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Algorithms/KMeans 
 source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Algorithms/EM Algorithm/EM Algorithm MV & Graphs  v1 20180329.R') #Algoritmo EM MV
 source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Criterios de Informacion/Definicion de Funciones.R') #Criterios de Informacion
 source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Modelo AHP/AHPClusterAnalysis beta 20180422.R') #Modelo AHP
-#AHP Model Analysis----
+#DataSet and Parameters ----
 
 x<-faithful
 g<-2 # cantidad de cluster Inicial
