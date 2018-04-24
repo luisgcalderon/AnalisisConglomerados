@@ -85,10 +85,10 @@ IC<-function(x,g,psi,metodo){
         lmt[is.infinite(lmt)]<-0
         ent<-ent+mt[,w]%*%lmt
       }
-      FVerCLC<-(-2)*FVer+2*as.numeric(ent)
+      FVerCLC<-(-2)*FVer-2*as.numeric(ent)
       return(FVerCLC)
     }
-    FVerCLC<-(-2)*FVer+2*as.numeric(ent)
+    FVerCLC<-(-2)*FVer-2*as.numeric(ent)
   }
   if (metodo=="KIC"|metodo=="ALL"){
     FVerKIC<-(-2)*FVer+3*(length(unlist(psi))+1)
