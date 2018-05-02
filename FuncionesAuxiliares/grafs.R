@@ -30,7 +30,7 @@ k2<-kmeans(x,centers = 2)
 k3<-kmeans(x,centers = 3)
 fviz_cluster(xkm, data = x,lab)
 
-p1 <- fviz_cluster(k2, geom = "point", data = x) + ggtitle("k = 2")
+p1 <- fviz_cluster(k2, geom = "point", data = x) + ggtitle("K-Medias",subtitle = "k=2") +theme_bw()
 p2 <- fviz_cluster(k3, geom = "point",  data = x) + ggtitle("k = 3")
 plot(p1)
 plot(p2)

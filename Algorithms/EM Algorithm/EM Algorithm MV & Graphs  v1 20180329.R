@@ -53,7 +53,7 @@ PlotEM_MV<-function(x,g,psi,q){
   }
   
   g.p<-ggplot(x,aes(waiting,eruptions))+
-    geom_point()+ggtitle("EM MV",subtitle = paste("Iteracion",q,sep=" "))+
+    geom_point()+ggtitle("EM MV",subtitle = paste("Iteracion",q,sep=" "))+theme_bw()+
     stat_ellipse(aes(a.y[,1],a.x[,1]),colour=raincol[1])+
     stat_ellipse(aes(a.y[,2],a.x[,2]),colour=raincol[2])
   plot(g.p) 
