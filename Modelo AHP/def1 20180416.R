@@ -8,10 +8,10 @@ rm(list = ls())
 
 #Source
 
-source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Algorithms/KMeans Algorithm/KMeans_Algorithm 20180420.R') #Algoritmos K-Means
+source('~/LuisCalderon/AnalisisConglomerados-RProject/AnalisisConglomerados/Algorithms/KMeans Algorithm/KMeans_Algorithm 20180420.R') #Algoritmos K-Means
 source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Algorithms/EM Algorithm/EM Algorithm MV & Graphs  v1 20180329.R') #Algoritmo EM MV
-source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Criterios de Informacion/Definicion de Funciones.R') #Criterios de Informacion
-source('~/Anahuac/AnalisisConglomerados/AnalisisConglomerados/Modelo AHP/AHPClusterAnalysis beta 20180422.R') #Modelo AHP
+source('~/LuisCalderon/AnalisisConglomerados-RProject/AnalisisConglomerados/Criterios de Informacion/Definicion de Funciones.R') #Criterios de Informacion
+source('~/LuisCalderon/AnalisisConglomerados-RProject/AnalisisConglomerados/Modelo AHP/AHPClusterAnalysis beta 20180422.R') #Modelo AHP
 #DataSet and Parameters ----
 
 x<-faithful
