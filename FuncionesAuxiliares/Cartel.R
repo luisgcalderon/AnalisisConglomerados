@@ -2,6 +2,8 @@
 #Proyecto de Investigacion: Analisis de Conglomerados
 #Jerarquico
 
+if (!require('dendextend')) install.packages('dendextend'); library('dendextend')
+
 x<-faithful
 per<-0.20
 w<-round(dim(x)[1]*per)
@@ -19,3 +21,7 @@ plot(hc1, cex=0.6,hang=-1,main = "Complete Linkage",labels = FALSE, xlab="Viejo 
 
 hc2<-hclust(d,method = "single")
 plot(hc2, cex=0.6,hang=-1,main = "Single Linkage",labels = FALSE,xlab="Viejo Fiel")
+d2=color_branches(hc1,k=5)
+plot(d2)
+plot(d2, cex=0.6,hang=-1,main = "Single Linkage",xlab="Viejo Fiel")
+d2=color_branches(hc2,k=5)
